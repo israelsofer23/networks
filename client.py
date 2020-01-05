@@ -8,7 +8,7 @@ TIMEOUT_WAIT = 15
 IP_BROADCAST = "255.255.255.255"
 WAITING_TIME = 1
 LOCALHOST = "127.0.0.1"
-TEAM_NAME = "this is a string with 32 chars!!"
+TEAM_NAME = "This is a string with 32 chars!!"
 DISCOVER = 1
 OFFER = 2
 REQUEST = 3
@@ -18,10 +18,13 @@ NEGATIVE_ACKNOWLEDGE = 5
 
 class Client:
 
-    def __init__(self, user_word, word_length):
-        self.user_hash = user_word
-        self.user_hash_length = word_length
-        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    def __init__(self, hash_to_crack, secret_length):
+        self.user_hash = hash_to_crack
+        self.user_hash_length = secret_length
+        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.udp_socket.bind(("", 3117))
 
     def start_activity(self):
         self.udp_socket.sendto(f'{TEAM_NAME}{DISCOVER}'.encode(), (IP_BROADCAST, SERVER_PORT))
@@ -46,8 +49,7 @@ class Client:
 
 
 if __name__ == "__main__":
-    user_hash = input("Welcome to <your-team-name-here>. Please enter the hash: ")
-    user_hash_length = input("Please enter the input string length: ")
-    user_hash_length = int(user_hash_length)
+    user_hash = "b44ed609de1619890c9397da58c224c24e0a7d3c" #input("Welcome to <your-team-name-here>. Please enter the hash: ")
+    user_hash_length = 5#int(input("Please enter the input string length: "))
     client = Client(user_hash, user_hash_length)
     client.start_activity()
