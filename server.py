@@ -22,11 +22,13 @@ class Server:
         self.udp_socket.bind((IP_ADDRESS, PORT))
         self.threads = []
 
+    # TODO: ReDesign suggestion - Thread that listens for messages (both offer and request) and dispatches thread to handle each operation
     # i will have a tread that is doing this function
     def offer(self):
         while True:
             data, client_address = self.udp_socket.recvfrom(4096)
-            if helpers.find_message_type(data) == DISCOVER:
+            message_type = helpers.find_message_type(data)
+            if message_type == DISCOVER:
                 self.udp_socket.sendto(f'{TEAM_NAME}{OFFER}'.encode(), client_address)
 
     def wait_for_request(self):

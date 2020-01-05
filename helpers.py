@@ -61,7 +61,7 @@ def split_fairly(input_length : int, number_of_servers : int):
 
 
 def find_message_type(message):
-    return int(message[32])
+    return int(message.decode()[32])
 
 
 def scan_and_compare(start_string, finish_string, hash):

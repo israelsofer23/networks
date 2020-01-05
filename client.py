@@ -51,7 +51,7 @@ class Client:
             exit(1337)
 
     def talk_with_servers(self, server, search_range):
-        self.udp_socket.sendto(f'{TEAM_NAME}{REQUEST}{self.user_hash}{self.user_hash_length}{search_range(0)}{search_range(1)}'.encode(), server)
+        self.udp_socket.sendto(f'{TEAM_NAME}{REQUEST}{self.user_hash}{self.user_hash_length}{search_range[0]}{search_range[1]}'.encode(), server)
 
 
 if __name__ == "__main__":
