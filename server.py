@@ -28,10 +28,14 @@ class Server:
             if helpers.find_message_type(data) == DISCOVER:
                 self.udp_socket.sendto(f'{TEAM_NAME}{OFFER}'.encode(), client_address)
 
-    # i want to have multiple treads that are doing this function, i want a thread per user
-    def handle_requests(self):
+    def wait_for_request(self):
         while True:
             data, client_address = self.udp_socket.recvfrom(4096)
+            helpers.handle_requests(data, client_address)
+
+    # i want to have multiple treads that are doing this function, i want a thread per user
+    def handle_requests(self, data, client_address):
             if helpers.find_message_type(data) == REQUEST:
                 usr_hash, length, start_from, finish_at = helpers.get_request_data(data)
-
+                user_word, ack = helpers.scan_and_compare(start_from, finish_at, usr_hash)
+                self.udp_socket.sendto(f'{TEAM_NAME}{ack}{usr_hash}{length}{user_word}'.encode(), client_address)

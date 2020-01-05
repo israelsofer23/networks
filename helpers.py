@@ -3,6 +3,10 @@ import string
 import itertools
 import hashlib
 
+ACKNOWLEDGE = 4
+NEGATIVE_ACKNOWLEDGE = 5
+
+
 def cycle_string(char_arr , jump_size):
     char_arr = list(reversed(char_arr))
     base_26_to_10 = sum([ ( ord(char_arr[i]) - ord('a') )*(26**i) for i in range(len(char_arr))])
@@ -62,8 +66,8 @@ def scan_and_compare(start_string, finish_string, hash):
         if start_string < item < finish_string:
             item_hash = hashlib.sha1(item.encode())
             if item_hash.hexdigit() == hash:
-                return item
-    return ""
+                return item, ACKNOWLEDGE
+    return "", NEGATIVE_ACKNOWLEDGE
 
 
 def get_request_data(message):
