@@ -15,6 +15,7 @@ REQUEST = 3
 ACKNOWLEDGE = 4
 NEGATIVE_ACKNOWLEDGE = 5
 
+
 class Server:
 
     def __init__(self):
@@ -27,6 +28,7 @@ class Server:
         while True:
             data, client_address = self.udp_socket.recvfrom(4096)
             if helpers.find_message_type(data) == DISCOVER:
+                print("I got discover message")
                 self.udp_socket.sendto(f'{TEAM_NAME}{OFFER}'.encode(), client_address)
 
     def wait_for_request(self):

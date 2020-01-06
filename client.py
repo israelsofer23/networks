@@ -22,6 +22,7 @@ class Client:
         self.user_hash = user_word
         self.user_hash_length = word_length
         self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
     def start_activity(self):
         self.udp_socket.sendto(f'{TEAM_NAME}{DISCOVER}'.encode(), (IP_BROADCAST, SERVER_PORT))
