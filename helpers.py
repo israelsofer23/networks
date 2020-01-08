@@ -3,8 +3,9 @@ import string
 import itertools
 import hashlib
 
-ACKNOWLEDGE = 4
-NEGATIVE_ACKNOWLEDGE = 5
+
+ACKNOWLEDGE = bytes([4])
+NEGATIVE_ACKNOWLEDGE = bytes([5])
 
 
 def cycle_string(char_arr , jump_size):
@@ -39,7 +40,7 @@ def split_fairly(input_length : int, number_of_servers : int):
         to_string += ["z"]
 
     space_size = 26 ** input_length
-    if(number_of_servers != 0):
+    if number_of_servers != 0:
         strings_per_server = int(math.floor(space_size / number_of_servers))
     else:
         raise ValueError("No server found, exiting!")
@@ -60,23 +61,42 @@ def split_fairly(input_length : int, number_of_servers : int):
     return ranges
 
 
-def find_message_type(message):
-    return int(message.decode()[32])
+def find_message_type(message):     # TODO: change type to binary value, NOT CHAR
+    return message[32]
 
 
-def scan_and_compare(start_string, finish_string, hash):
+def scan_and_compare(start_string, finish_string, hash_word):
+    print(start_string)
+    print(finish_string)
+    start_string = start_string.decode()
+    finish_string = finish_string.decode()
+    hash_word = hash_word.decode()
+    hash_word = bin(int(hash_word, base=16)).lstrip('0b')
+    hash_word = int(hash_word, 2)
     for item in [''.join(x) for x in itertools.product(string.ascii_lowercase, repeat=len(start_string))]:
-        if start_string < item < finish_string:
+        if start_string <= item <= finish_string:
             item_hash = hashlib.sha1(item.encode())
-            if item_hash.hexdigit() == hash:
+            string_binary_hash = bin(int(item_hash.hexdigest(), base=16)).lstrip('0b')
+            if int(string_binary_hash, 2) == hash_word:
                 return item, ACKNOWLEDGE
     return "", NEGATIVE_ACKNOWLEDGE
 
 
-def get_request_data(message):
-    user_hash = message[33:73]
-    length = message[73]
-    start_from = message[74:74+length]
-    finish_at = message[74+length:]
+def get_request_data(message):  # TODO: magic numbers, start_from & finish_at might always be 256 bits,
+    if len(message) == 586:
+        user_hash = message[33:73]
+        length = message[73]
+        start_from = message[74:74 + length]
+        finish_at = message[330: 330+length]
+    else:
+        user_hash = message[33:73]
+        length = message[73]
+        start_from = message[74:74+length]
+        finish_at = message[74+length:]
     return user_hash, length, start_from, finish_at
+
+
+def pad(amount):
+    return '\0' * amount
+
 

@@ -8,12 +8,12 @@ PORT = 3117
 TIMEOUT_RUN = 10
 IP_BROADCAST = "255.255.255.255"
 IP_ADDRESS = "0.0.0.0"
-TEAM_NAME = "this is a string with 32 chars!!"
-DISCOVER = 1
-OFFER = 2
-REQUEST = 3
-ACKNOWLEDGE = 4
-NEGATIVE_ACKNOWLEDGE = 5
+TEAM_NAME = b'This is a string with 32 chars!!'
+DISCOVER = bytes([1])
+OFFER = bytes([2])
+REQUEST = bytes([3])
+ACKNOWLEDGE = bytes([4])
+NEGATIVE_ACKNOWLEDGE = bytes([5])
 
 
 class Server:
@@ -29,25 +29,44 @@ class Server:
         while True:
             data, client_address = self.udp_socket.recvfrom(4096)
             message_type = helpers.find_message_type(data)
-            if message_type == DISCOVER:
-                self.udp_socket.sendto(f'{TEAM_NAME}{OFFER}'.encode(), client_address)
+            if bytes([message_type]) == DISCOVER:
+                print("got a discover message!")
+                self.send_offer_message(client_address)
+            elif bytes([message_type]) == REQUEST:
+                print("got a request message")
+                client = threading.Thread(target=self.handle_requests, args=(data, client_address,))
+                self.threads.append(client)
+                client.start()
 
     def wait_for_request(self):
         while True:
             data, client_address = self.udp_socket.recvfrom(4096)
-            self.threads.append(threading.Thread(target=self.handle_requests, args=(data, client_address,)))
+            message_type = helpers.find_message_type(data)
+            if bytes([message_type]) == DISCOVER:
+                print("got a discover message!")
+                self.send_offer_message(client_address)
+            elif bytes([message_type]) == REQUEST:
+                print("got a request message")
+                client = threading.Thread(target=self.handle_requests, args=(data, client_address,))
+                self.threads.append(client)
+                client.start()
 
     # i want to have multiple treads that are doing this function, i want a thread per user
     def handle_requests(self, data, client_address):
-            if helpers.find_message_type(data) == REQUEST:
-                usr_hash, length, start_from, finish_at = helpers.get_request_data(data)
-                user_word, ack = helpers.scan_and_compare(start_from, finish_at, usr_hash)
-                self.udp_socket.sendto(f'{TEAM_NAME}{ack}{usr_hash}{length}{user_word}'.encode(), client_address)
+            usr_hash, length, start_from, finish_at = helpers.get_request_data(data)
+            user_word, ack = helpers.scan_and_compare(start_from, finish_at, usr_hash)
+            message_len = len(TEAM_NAME.decode()) + 1 + len(usr_hash.decode()) + 1 + len(user_word)
+            self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + (helpers.pad(586 - message_len)).encode(), client_address)
+
+    def send_offer_message(self, client_address):
+        self.udp_socket.sendto(TEAM_NAME + OFFER + (helpers.pad(41 + 256 + 256)).encode(), client_address)
 
 
 if __name__ == '__main__':
     server = Server()
     offer_thread = threading.Thread(target=server.offer, args=())
+    temp = threading.Thread(target=server.wait_for_request, args=())
+    temp.start()
     offer_thread.start()
     server.wait_for_request()
 
