@@ -89,17 +89,20 @@ def scan_and_compare(start_string, finish_string, hash_word):
 
 
 def get_request_data(message):  # TODO: magic numbers, start_from & finish_at might always be 256 bits,
-    if len(message) == 586:
-        user_hash = message[33:73]
-        length = message[73]
-        start_from = message[74:74 + length]
-        finish_at = message[330: 330+length]
-    else:
-        user_hash = message[33:73]
-        length = message[73]
-        start_from = message[74:74+length]
-        finish_at = message[74+length:]
-    return user_hash, length, start_from, finish_at
+    try:
+        if len(message) == 586:
+            user_hash = message[33:73]
+            length = message[73]
+            start_from = message[74:74 + length]
+            finish_at = message[330: 330+length]
+        else:
+            user_hash = message[33:73]
+            length = message[73]
+            start_from = message[74:74+length]
+            finish_at = message[74+length:]
+        return user_hash, length, start_from, finish_at
+    except:
+        return "", 0, "", ""
 
 
 def pad(amount):

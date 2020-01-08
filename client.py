@@ -59,7 +59,7 @@ class Client:
             except NotFoundException:
                 exception_counter += 1
             if exception_counter == len(servers_addresses):
-                raise NotFoundException
+                sys.exit()
         else:
             print("No servers answered, exiting.")
             exit(1337)
@@ -81,6 +81,10 @@ class Client:
 
 if __name__ == "__main__":
     user_hash = input("Welcome to The ARP poisoners!. Please enter the hash: ")
+    while len(user_hash) != 40:
+        user_hash = input("not good, Please enter the hash: ")
     user_hash_length = int(input("Please enter the input string length: "))
+    while user_hash_length < 0:
+        user_hash_length = int(input("not good, Please enter the input string length: "))
     client = Client(user_hash, user_hash_length)
     client.start_activity()
