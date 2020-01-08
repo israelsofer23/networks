@@ -69,21 +69,23 @@ def find_message_type(message):     # TODO: change type to binary value, NOT CHA
 
 
 def scan_and_compare(start_string, finish_string, hash_word):
-    print(hash_word)
-    print(start_string)
-    print(finish_string)
-    start_string = start_string.decode()
-    finish_string = finish_string.decode()
-    hash_word = hash_word.decode()
-    hash_word = bin(int(hash_word, base=16)).lstrip('0b')
-    hash_word = int(hash_word, 2)
-    for item in [''.join(x) for x in itertools.product(string.ascii_lowercase, repeat=len(start_string))]:
-        if start_string <= item <= finish_string:
-            item_hash = hashlib.sha1(item.encode())
-            string_binary_hash = bin(int(item_hash.hexdigest(), base=16)).lstrip('0b')
-            if int(string_binary_hash, 2) == hash_word:
-                return item, ACKNOWLEDGE
-    return "", NEGATIVE_ACKNOWLEDGE
+    try:
+        print(hash_word)
+        print(start_string)
+        print(finish_string)
+        start_string = start_string.decode()
+        finish_string = finish_string.decode()
+        hash_word = hash_word.decode()
+        hash_word = bin(int(hash_word, base=16)).lstrip('0b')
+        hash_word = int(hash_word, 2)
+        for item in [''.join(x) for x in itertools.product(string.ascii_lowercase, repeat=len(start_string))]:
+            if start_string <= item <= finish_string:
+                item_hash = hashlib.sha1(item.encode())
+                string_binary_hash = bin(int(item_hash.hexdigest(), base=16)).lstrip('0b')
+                if int(string_binary_hash, 2) == hash_word:
+                    return item, ACKNOWLEDGE
+    except:
+        return "", NEGATIVE_ACKNOWLEDGE
 
 
 def get_request_data(message):  # TODO: magic numbers, start_from & finish_at might always be 256 bits,
