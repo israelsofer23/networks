@@ -8,7 +8,7 @@ PORT = 3117
 TIMEOUT_RUN = 10
 IP_BROADCAST = "255.255.255.255"
 IP_ADDRESS = "0.0.0.0"
-TEAM_NAME = b'This is a string with 32 chars!!'
+TEAM_NAME = b'The ARP poisoners!              '
 DISCOVER = bytes([1])
 OFFER = bytes([2])
 REQUEST = bytes([3])
@@ -56,10 +56,10 @@ class Server:
             usr_hash, length, start_from, finish_at = helpers.get_request_data(data)
             user_word, ack = helpers.scan_and_compare(start_from, finish_at, usr_hash)
             message_len = len(TEAM_NAME.decode()) + 1 + len(usr_hash.decode()) + 1 + len(user_word)
-            self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + (helpers.pad(586 - message_len)).encode(), client_address)
+            self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + user_word.encode(), client_address)
 
     def send_offer_message(self, client_address):
-        self.udp_socket.sendto(TEAM_NAME + OFFER + (helpers.pad(41 + 256 + 256)).encode(), client_address)
+        self.udp_socket.sendto(TEAM_NAME + OFFER + (helpers.pad(40)).encode() + bytes([0]), client_address)
 
 
 if __name__ == '__main__':

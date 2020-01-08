@@ -1,7 +1,6 @@
 import socket
 import threading
 import time
-import select
 import helpers
 import NotFoundException
 import sys
@@ -11,7 +10,7 @@ TIMEOUT_WAIT = 15
 IP_BROADCAST = "255.255.255.255"
 WAITING_TIME = 1
 LOCALHOST = "127.0.0.1"
-TEAM_NAME = b'This is a string with 32 chars!!'
+TEAM_NAME = b'The ARP poisoners!              '
 DISCOVER = bytes([1])
 OFFER = bytes([2])
 REQUEST = bytes([3])
@@ -35,7 +34,7 @@ class Client:
     def wait_for_servers(self):
         time_to_end = time.time() + WAITING_TIME
         servers_addresses = []
-        self.udp_socket.settimeout(1)
+        self.udp_socket.settimeout(WAITING_TIME)
         while time.time() <= time_to_end:
             # is_socket_ready = select.select([self.udp_socket], [], [], WAITING_TIME)[0]  # Returned lists are ready FDs for read, write and error (if I'm not mistaken)
             # if is_socket_ready:
@@ -68,7 +67,7 @@ class Client:
     def talk_with_servers(self, server, search_range):
         self.udp_socket.sendto(TEAM_NAME + REQUEST + self.user_hash.encode() + bytes([self.user_hash_length]) + search_range[0].encode() + search_range[1].encode(), server)
         print("sent a request message")
-        self.udp_socket.settimeout(15)
+        self.udp_socket.settimeout(TIMEOUT_WAIT)
         try:
             server_response, address = self.udp_socket.recvfrom(4096)
             if server_response:
@@ -81,7 +80,7 @@ class Client:
 
 
 if __name__ == "__main__":
-    user_hash = input("Welcome to <your-team-name-here>. Please enter the hash: ")
+    user_hash = input("Welcome to The ARP poisoners!. Please enter the hash: ")
     user_hash_length = int(input("Please enter the input string length: "))
     client = Client(user_hash, user_hash_length)
     client.start_activity()
