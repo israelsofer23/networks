@@ -28,7 +28,7 @@ class Client:
         self.udp_socket.setblocking(False)
 
     def start_activity(self):
-        self.udp_socket.sendto(TEAM_NAME + DISCOVER + (helpers.pad(41+256+256)).encode(), (IP_BROADCAST, SERVER_PORT))  # TODO: Missing fields
+        self.udp_socket.sendto(TEAM_NAME + DISCOVER + (helpers.pad(40)).encode() + bytes([0]), (IP_BROADCAST, SERVER_PORT))  # TODO: Missing fields
         self.wait_for_servers()
 
     def wait_for_servers(self):

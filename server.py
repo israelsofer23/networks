@@ -51,7 +51,10 @@ class Server:
             message_len = len(TEAM_NAME.decode()) + 1 + len(usr_hash.decode()) + 1 + len(user_word)
             print(user_word + "ssssssssss")
             print(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + user_word.encode())
-            self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + user_word.encode(), client_address)
+            if user_word:
+                self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + user_word.encode(), client_address)
+            else:
+                self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([0]), client_address)
 
     def send_offer_message(self, client_address):
         print(TEAM_NAME + OFFER + (helpers.pad(40)).encode() + bytes([0]))
