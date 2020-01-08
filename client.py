@@ -71,8 +71,8 @@ class Client:
         try:
             server_response, address = self.udp_socket.recvfrom(4096)
             if server_response:
-                server_response = server_response.decode()
-                print(server_response[74:])
+                user_hash, length, start_from, finish_at = helpers.get_request_data(server_response)
+                print(start_from.decode())
                 sys.exit()
             raise NotFoundException
         except socket.timeout:

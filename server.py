@@ -52,7 +52,7 @@ class Server:
             print(user_word + "ssssssssss")
             print(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + user_word.encode())
             if user_word:
-                self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + helpers.pad(length), client_address)
+                self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + helpers.pad(length).encode(), client_address)
             else:
                 self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([0]), client_address)
 
