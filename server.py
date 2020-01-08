@@ -1,6 +1,5 @@
 import socket
 import threading
-import time
 import helpers
 
 
@@ -33,10 +32,7 @@ class Server:
                 print("got a discover message!")
                 self.send_offer_message(client_address)
             elif bytes([message_type]) == REQUEST:
-                print("got a request message")
-                client = threading.Thread(target=self.handle_requests, args=(data, client_address,))
-                self.threads.append(client)
-                client.start()
+                self.send_request_message(data, client_address)
 
     def wait_for_request(self):
         while True:
@@ -46,21 +42,26 @@ class Server:
                 print("got a discover message!")
                 self.send_offer_message(client_address)
             elif bytes([message_type]) == REQUEST:
-                print("got a request message")
-                client = threading.Thread(target=self.handle_requests, args=(data, client_address,))
-                self.threads.append(client)
-                client.start()
+                self.send_request_message(data, client_address)
 
     # i want to have multiple treads that are doing this function, i want a thread per user
     def handle_requests(self, data, client_address):
             usr_hash, length, start_from, finish_at = helpers.get_request_data(data)
             user_word, ack = helpers.scan_and_compare(start_from, finish_at, usr_hash)
             message_len = len(TEAM_NAME.decode()) + 1 + len(usr_hash.decode()) + 1 + len(user_word)
+            print(user_word + "ssssssssss")
+            print(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + user_word.encode())
             self.udp_socket.sendto(TEAM_NAME + ack + usr_hash + bytes([length]) + user_word.encode() + user_word.encode(), client_address)
 
     def send_offer_message(self, client_address):
+        print(TEAM_NAME + OFFER + (helpers.pad(40)).encode() + bytes([0]))
         self.udp_socket.sendto(TEAM_NAME + OFFER + (helpers.pad(40)).encode() + bytes([0]), client_address)
 
+    def send_request_message(self, data, client_address):
+        print("got a request message")
+        client = threading.Thread(target=self.handle_requests, args=(data, client_address,))
+        self.threads.append(client)
+        client.start()
 
 if __name__ == '__main__':
     server = Server()

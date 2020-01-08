@@ -62,10 +62,14 @@ def split_fairly(input_length : int, number_of_servers : int):
 
 
 def find_message_type(message):     # TODO: change type to binary value, NOT CHAR
-    return message[32]
+    try:
+        return message[32]
+    except:
+        return 5
 
 
 def scan_and_compare(start_string, finish_string, hash_word):
+    print(hash_word)
     print(start_string)
     print(finish_string)
     start_string = start_string.decode()
