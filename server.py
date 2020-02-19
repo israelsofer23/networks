@@ -23,7 +23,7 @@ class Server:
         self.threads = []
 
     # TODO: ReDesign suggestion - Thread that listens for messages (both offer and request) and dispatches thread to handle each operation
-    # i will have a tread that is doing this function
+    # I will have a thread that is doing this function
     def offer(self):
         while True:
             data, client_address = self.udp_socket.recvfrom(4096)
