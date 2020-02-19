@@ -25,7 +25,7 @@ class Server:
     # TODO: ReDesign suggestion - Thread that listens for messages (both offer and request) and dispatches thread to handle each operation
     # I will have a thread that is doing this function
     def offer(self):
-#while True:
+        while True:
             data, client_address = self.udp_socket.recvfrom(4096)
             message_type = helpers.find_message_type(data)
             if bytes([message_type]) == DISCOVER:
@@ -33,7 +33,7 @@ class Server:
                 self.send_offer_message(client_address)
             elif bytes([message_type]) == REQUEST:
                 self.send_request_message(data, client_address)
-
+# asdasdasdasdasd
     def wait_for_request(self):
         while True:
             data, client_address = self.udp_socket.recvfrom(4096)
