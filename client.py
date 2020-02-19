@@ -1,20 +1,21 @@
 import socket
 import threading
 import time
-import select
 import helpers
+import NotFoundException
+import sys
 
 SERVER_PORT = 3117
 TIMEOUT_WAIT = 15
 IP_BROADCAST = "255.255.255.255"
 WAITING_TIME = 1
 LOCALHOST = "127.0.0.1"
-TEAM_NAME = "This is a string with 32 chars!!"
-DISCOVER = 1
-OFFER = 2
-REQUEST = 3
-ACKNOWLEDGE = 4
-NEGATIVE_ACKNOWLEDGE = 5
+TEAM_NAME = b'The ARP poisoners!              '
+DISCOVER = bytes([1])
+OFFER = bytes([2])
+REQUEST = bytes([3])
+ACKNOWLEDGE = bytes([4])
+NEGATIVE_ACKNOWLEDGE = bytes([5])
 
 
 class Client:
@@ -27,35 +28,63 @@ class Client:
         self.udp_socket.setblocking(False)
 
     def start_activity(self):
-        self.udp_socket.sendto(f'{TEAM_NAME}{DISCOVER}'.encode(), (IP_BROADCAST, SERVER_PORT))
+        self.udp_socket.sendto(TEAM_NAME + DISCOVER + (helpers.pad(40)).encode() + bytes([0]), (IP_BROADCAST, SERVER_PORT))  # TODO: Missing fields
         self.wait_for_servers()
 
     def wait_for_servers(self):
         time_to_end = time.time() + WAITING_TIME
         servers_addresses = []
+        self.udp_socket.settimeout(WAITING_TIME)
         while time.time() <= time_to_end:
-            is_socket_ready = select.select([self.udp_socket], [], [], WAITING_TIME)[0]  # Returned lists are ready FDs for read, write and error (if I'm not mistaken)
-            if is_socket_ready:
+            # is_socket_ready = select.select([self.udp_socket], [], [], WAITING_TIME)[0]  # Returned lists are ready FDs for read, write and error (if I'm not mistaken)
+            # if is_socket_ready:
+            try:
                 data, server = self.udp_socket.recvfrom(4096)
-                if helpers.find_message_type(data) == OFFER:
+                if bytes([helpers.find_message_type(data)]) == OFFER:
+                    print("got an offer message!")
                     servers_addresses.append(server)
-        if (len(servers_addresses) > 0):
+            except socket.timeout:
+                pass
+        if len(servers_addresses) > 0:
             ranges = helpers.split_fairly(self.user_hash_length, len(servers_addresses))
             threads = []
+            exception_counter = 0
             for index in range(len(servers_addresses)):
                 threads.append(threading.Thread(target=self.talk_with_servers, args=(servers_addresses[index], ranges[index],)))
-            for thread in threads:
-                thread.start()
+            try:
+                for thread in threads:
+                    thread.start()
+                for thread in threads:
+                    thread.join()
+            except NotFoundException:
+                exception_counter += 1
+            if exception_counter == len(servers_addresses):
+                sys.exit()
         else:
             print("No servers answered, exiting.")
             exit(1337)
 
     def talk_with_servers(self, server, search_range):
-        self.udp_socket.sendto(f'{TEAM_NAME}{REQUEST}{self.user_hash}{self.user_hash_length}{search_range[0]}{search_range[1]}'.encode(), server)
+        self.udp_socket.sendto(TEAM_NAME + REQUEST + self.user_hash.encode() + bytes([self.user_hash_length]) + search_range[0].encode() + search_range[1].encode(), server)
+        print("sent a request message")
+        self.udp_socket.settimeout(TIMEOUT_WAIT)
+        try:
+            server_response, address = self.udp_socket.recvfrom(4096)
+            if server_response:
+                user_hash, length, start_from, finish_at = helpers.get_request_data(server_response)
+                print(start_from.decode())
+                sys.exit()
+            raise NotFoundException
+        except socket.timeout:
+            raise NotFoundException
 
 
 if __name__ == "__main__":
-    user_hash = "b44ed609de1619890c9397da58c224c24e0a7d3c"#input("Welcome to <your-team-name-here>. Please enter the hash: ")
-    user_hash_length = 5#int(input("Please enter the input string length: "))
+    user_hash = input("Welcome to The ARP poisoners!. Please enter the hash: ")
+    while len(user_hash) != 40:
+        user_hash = input("not good, Please enter the hash: ")
+    user_hash_length = int(input("Please enter the input string length: "))
+    while user_hash_length < 0:
+        user_hash_length = int(input("not good, Please enter the input string length: "))
     client = Client(user_hash, user_hash_length)
     client.start_activity()
