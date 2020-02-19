@@ -55,7 +55,7 @@ class Client:
 
 
 if __name__ == "__main__":
-    user_hash = input("Welcome to <your-team-name-here>. Please enter the hash: ")
-    user_hash_length = int(input("Please enter the input string length: "))
+    user_hash = "b44ed609de1619890c9397da58c224c24e0a7d3c"#input("Welcome to <your-team-name-here>. Please enter the hash: ")
+    user_hash_length = 5#int(input("Please enter the input string length: "))
     client = Client(user_hash, user_hash_length)
     client.start_activity()
